@@ -2,6 +2,10 @@ local M = {
     plugins_path = vim.fn.stdpath("data")
 }
 
+M.hardupdates = function()
+    print("Hard updates")
+end
+
 M.check = function()
     local files = {}
     local handle = vim.loop.fs_scandir(M.plugins_path)
