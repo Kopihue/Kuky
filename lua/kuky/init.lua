@@ -3,7 +3,8 @@ local M = {
 }
 
 M.hardupdates = function()
-    print("Hard updates")
+    os.execute("rm -rf " .. M.plugins_path .. "/*")
+    print("Restart Neovim c':")
 end
 
 M.check = function()
