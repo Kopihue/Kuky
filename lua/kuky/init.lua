@@ -4,8 +4,7 @@ local M = {
 
 M.hardupdates = function()
     os.execute("rm -rf " .. M.plugins_path .. "/*")
-    print("Restart Neovim c':")
-end
+    print("Restart Neovim c':") end
 
 M.check = function()
     local files = {}
@@ -24,7 +23,16 @@ M.check = function()
     end
 end
 
-M.install = function(plugin, config)
+M.install = function(plugin, config, dependencies)
+    if dependencies then
+	for _, dep in ipairs(dependencies) do
+	    M.install(
+		dep,
+		function() end
+	    )
+	end
+    end
+
     local parts = {}
     for part in string.gmatch(plugin, "[^/]+") do
 	table.insert(parts, part)
