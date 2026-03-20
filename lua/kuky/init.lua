@@ -2,6 +2,8 @@ local M = {}
 
 M.install = function(plugin, config)
     local plugin = "https://github.com/" .. plugin .. ".git"
+    print(plugin)
+    config()
 end
 
 return M
