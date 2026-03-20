@@ -2,8 +2,21 @@ local M = {
     plugins_path = vim.fn.stdpath("data")
 }
 
-M.update = function()
-    print("Updating plugin")
+M.check = function()
+    local files = {}
+    local handle = vim.loop.fs_scandir(M.plugins_path)
+    while true do
+	local name, t = vim.loop.fs_scandir_next(handle)
+	if not name then break end
+	table.insert(files, name)
+    end
+
+    for _, file in ipairs(files) do
+	local plugin = M.plugins_path .. "/" .. file
+	if vim.uv.fs_stat(plugin .. "/.git") then
+	    print(file .. " Is a git repository")
+	end
+    end
 end
 
 M.install = function(plugin, config)
