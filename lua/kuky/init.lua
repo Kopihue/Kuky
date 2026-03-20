@@ -11,8 +11,19 @@ M.install = function(plugin, config)
     local plugin = "https://github.com/" .. plugin .. ".git"
 
     if not vim.uv.fs_stat(M.plugins_path .. "/" .. plugin_name) then
-	print("Plugin doesn't exist")
+	vim.notify("Installing -> " .. plugin_name)
+	local result = vim.fn.system({
+	    "git",
+	    "clone",
+	    "--depth", "1",
+	    "--filter=blob:none",
+	    plugin,
+	    M.plugins_path .. "/" .. plugin_name,
+	})
     end
+
+    vim.opt.rtp:prepend(M.plugins_path .. "/" .. plugin_name)
+    config()
 end
 
 return M
