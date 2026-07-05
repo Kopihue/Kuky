@@ -9,6 +9,7 @@ def main():
 
     help_panel = False
     switch, profile = False, None
+    list_profiles = False
     random = False
 
     # switch, hola
@@ -27,6 +28,10 @@ def main():
                 except IndexError:
                     print("Switch action requires a profile to work with!")
                     return
+                break
+
+            case "list":
+                list_profiles = True
                 break
 
             case "random":
@@ -49,6 +54,10 @@ def main():
 
     elif random:
         action = Actions()
+
+    elif list:
+        action = Actions()
+        action.list_profiles()
 
 if __name__ == "__main__":
     main()

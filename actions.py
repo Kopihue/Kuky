@@ -37,3 +37,7 @@ class Actions:
             else:
                 shutil.rmtree(config_dir) if config_dir.is_dir() else config_dir.unlink()
             config_dir.symlink_to(config)
+
+    def list_profiles(self):
+        for profile in self.profiles:
+            print(profile.name)
