@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-import sys
+import sys 
 from actions import Actions
+from logs import Log
+from exceptions import *
 
-def main():
+def main() -> int:
     args = sys.argv[1:]
     args.reverse()
 
@@ -11,8 +13,11 @@ def main():
     switch, profile = False, None
     list_profiles = False
     random = False
+    enable_verbose = True
 
-    # switch, hola
+    if not args:
+        help_panel = True
+
     while args:
         arg = args.pop()
 
@@ -26,8 +31,8 @@ def main():
                 try:
                     profile = args.pop()
                 except IndexError:
-                    print("Switch action requires a profile to work with!")
-                    return
+                    Log("Switch action requires a profile to work with!").error()
+                    return 0
                 break
 
             case "list":
@@ -38,26 +43,86 @@ def main():
                 random = True
                 break
 
-            case _:
-                print("Invalid action, try: \"help\" for help!")
-                return
+            case "-s":
+                enable_verbose = False
 
+            case _:
+                Log("Invalid action, try: \"help\" for help!").warning()
+                return 0
+
+    Log.enabled = enable_verbose
     if help_panel:
         print("Help panel deployed")
+        return 0
 
     elif switch and profile:
-        action = Actions()
+        error_ocurred = False
+
+        Log("Starting class...").info()
+
         try:
-            action.switch_profile(profile)
-        except Exception as e:
-            print(e)
+            action = Actions()
+            action.switch_chosen_profile(profile)
+        except CreateKukyConfigDirError as e:
+            Log(str(e)).error()
+            error_ocurred = True
+        except ValueError as e:
+            Log(str(e)).error()
+            error_ocurred = True
+        except RestartWindowManagerError as e:
+            Log(str(e)).warning()
+            error_ocurred = True
+        except CommandsFailedError as e:
+            Log(str(e)).error()
+            error_ocurred = True
+            
+        if error_ocurred:
+            return 1
 
     elif random:
-        action = Actions()
+        error_ocurred = False
+        try:
+            action = Actions()
+            action.switch_random_profile()
+        except CreateKukyConfigDirError as e:
+            Log(str(e)).error()
+            error_ocurred = True
+        except IndexError as e:
+            Log(str(e)).error()
+            error_ocurred = True
+        except ValueError as e:
+            Log(str(e)).error()
+            error_ocurred = True
+        except RestartWindowManagerError as e:
+            Log(str(e)).warning()
+            error_ocurred = True
+        except CommandsFailedError as e:
+            Log(str(e)).error()
+            error_ocurred = True
 
-    elif list:
-        action = Actions()
-        action.list_profiles()
+        if error_ocurred:
+            return 1
+
+    elif list_profiles:
+        error_ocurred = False
+        try:
+            action = Actions()
+            profiles = action.get_profiles_list()
+        except CreateKukyConfigDirError as e:
+            Log(str(e)).error()
+            error_ocurred = True
+            
+        if error_ocurred:
+            return 1
+
+        if not profiles:
+            Log("No profiles to show, create yourself one bro").warning()
+        else:
+            for profile in profiles:
+                print(f"[+] {profile.name}")
+
+    return 0
 
 if __name__ == "__main__":
-    main()
+    status_code = main()
+    sys.exit(status_code)
