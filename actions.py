@@ -24,6 +24,10 @@ class Actions:
 
         Log("Loading profiles into memory...").info()
         self.profiles = [profile for profile in self.kuky_dir.iterdir()]
+
+    @staticmethod
+    def show_help_panel():
+        print("USAGE: kuky [flag] [action] [argument]")
     
     def switch_chosen_profile(self, chosen_profile: str):
         Log(f"Verifying chosen profile \"{chosen_profile}\" existence...").info()

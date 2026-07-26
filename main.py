@@ -52,7 +52,7 @@ def main() -> int:
 
     Log.enabled = enable_verbose
     if help_panel:
-        print("Help panel deployed")
+        Actions.show_help_panel()
         return 0
 
     elif switch and profile:
