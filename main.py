@@ -63,16 +63,19 @@ def main() -> int:
             action = Actions()
             action.switch_chosen_profile(profile)
         except CreateKukyConfigDirError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
+
         except ValueError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
+            
         except RestartWindowManagerError as e:
-            Log(str(e)).warning(True)
+            Log(str(e), force=True).warning()
             error_ocurred = True
+
         except CommandsFailedError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
             
         if error_ocurred:
@@ -84,19 +87,23 @@ def main() -> int:
             action = Actions()
             action.switch_random_profile()
         except CreateKukyConfigDirError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
+
         except IndexError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
+
         except ValueError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
+
         except RestartWindowManagerError as e:
-            Log(str(e)).warning(True)
+            Log(str(e), force=True).warning()
             error_ocurred = True
+
         except CommandsFailedError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
 
         if error_ocurred:
@@ -108,14 +115,14 @@ def main() -> int:
             action = Actions()
             profiles = action.get_profiles_list()
         except CreateKukyConfigDirError as e:
-            Log(str(e)).error(True)
+            Log(str(e), force=True).error()
             error_ocurred = True
             
         if error_ocurred:
             return 1
 
         if not profiles:
-            Log("No profiles to show, create yourself one bro").warning(True)
+            Log("No profiles to show, create yourself one bro", force=True).warning()
         else:
             for profile in profiles:
                 print(f"[+] {profile.name}")

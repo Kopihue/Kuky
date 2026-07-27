@@ -1,25 +1,41 @@
 class Log:
     enabled = True
 
-    def __init__(self, message: str = "Message left empty..."):
+    def __init__(
+            self,
+            message: str = "Message left empty...",
+            force: bool = False,
+            tabs: int = 0,
+            new_lines: int = 0,
+            ):
+
         self.message = message
+        self.force = force
 
-    def error(self, force: bool = False):
-        if Log.enabled or force:
-            print(f"[ERROR] {self.message}")
+        self.tabs = ""
+        for tab in range(tabs):
+            self.tabs += "\t"
 
-    def unknown_error(self, force: bool = False):
-        if Log.enabled or force:
-            print(f"[UNKNOWN ERROR] {self.message}")
+        self.new_lines = ""
+        for new in range(new_lines):
+            self.new_lines += "\n"
 
-    def warning(self, force: bool = False):
-        if Log.enabled or force:
-            print(f"[WARNING] {self.message}")
+    def error(self):
+        if Log.enabled or self.force:
+            print(f"{self.new_lines}{self.tabs}[ERROR] {self.message}")
 
-    def success(self, force: bool = False):
-        if Log.enabled or force:
-            print(f"[SUCCESS] {self.message}")
+    def unknown_error(self):
+        if Log.enabled or self.force:
+            print(f"{self.new_lines}{self.tabs}[UNKNOWN ERROR] {self.message}")
 
-    def info(self, force: bool = False):
-        if Log.enabled or force:
-            print(f"[INFO] {self.message}")
+    def warning(self):
+        if Log.enabled or self.force:
+            print(f"{self.new_lines}{self.tabs}[WARNING] {self.message}")
+
+    def success(self):
+        if Log.enabled or self.force:
+            print(f"{self.new_lines}{self.tabs}[SUCCESS] {self.message}")
+
+    def info(self):
+        if Log.enabled or self.force:
+            print(f"{self.new_lines}{self.tabs}[INFO] {self.message}")
