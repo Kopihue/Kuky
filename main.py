@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys 
+import sys
 from actions import Actions
 from logs import Log
 from exceptions import *
@@ -69,7 +69,7 @@ def main() -> int:
         except ValueError as e:
             Log(str(e), force=True).error()
             error_ocurred = True
-            
+
         except RestartWindowManagerError as e:
             Log(str(e), force=True).warning()
             error_ocurred = True
@@ -77,7 +77,7 @@ def main() -> int:
         except CommandsFailedError as e:
             Log(str(e), force=True).error()
             error_ocurred = True
-            
+
         if error_ocurred:
             return 1
 
@@ -117,7 +117,7 @@ def main() -> int:
         except CreateKukyConfigDirError as e:
             Log(str(e), force=True).error()
             error_ocurred = True
-            
+
         if error_ocurred:
             return 1
 

@@ -19,7 +19,7 @@ class CommandsFailedError(Exception):
         super().__init__(commands)
         self.commands = commands
 
-    def __str__(self) -> str: 
+    def __str__(self) -> str:
         errors = "\n".join(
             f"  --> {command}: {error}"
             for command, error in self.commands.items()

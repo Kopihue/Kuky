@@ -1,16 +1,20 @@
-from pathlib import Path
-import pathlib
 import time
 import shutil
 import random
 import subprocess
 import tomllib
-from exceptions import *
+from pathlib import Path
+
+from exceptions import (
+    CommandsFailedError,
+    CreateKukyConfigDirError,
+    RestartWindowManagerError,
+)
 from logs import Log
 
 class Actions:
     def __init__(self):
-        self.config_dir = pathlib.Path.home() / ".config"
+        self.config_dir = Path.home() / ".config"
         self.kuky_dir = self.config_dir / "kuky"
 
         Log("Verifying ~/.config/kuky/ existence...", tabs=1).info()
@@ -19,7 +23,7 @@ class Actions:
             Log("Creating it...", tabs=1).info()
             try:
                 self.kuky_dir.mkdir(parents = True)
-            except Exception as e:
+            except OSError as e:
                 raise CreateKukyConfigDirError(str(e))
 
         Log("Loading profiles into memory...", tabs=1).info()
@@ -28,7 +32,7 @@ class Actions:
     @staticmethod
     def show_help_panel():
         print("USAGE: kuky [flag] [action] [argument]")
-    
+
     def switch_chosen_profile(self, chosen_profile: str):
         Log(f"Verifying chosen profile \"{chosen_profile}\" existence...", new_lines=1).info()
         profile = self.kuky_dir / chosen_profile
@@ -58,10 +62,7 @@ class Actions:
 
         choice = random.randint(0, len(self.profiles) - 1)
         Log(f"The randomness of life has chosen: {self.profiles[choice].name}!").info()
-        try:
-            self.switch_chosen_profile(self.profiles[choice].name)
-        except Exception as e: 
-            raise e
+        self.switch_chosen_profile(self.profiles[choice].name)
 
     def get_profiles_list(self) -> list[Path]:
         return self.profiles.copy()
@@ -111,7 +112,7 @@ class Actions:
         if reload:
             for program in reload:
                 Log(f"Running \"pkill\" for: {program}...", tabs=1).info()
-                subprocess.run(["pkill", program], capture_output = True, text = True)
+                subprocess.run(["pkill", program], capture_output=True, text=True, check=False)
 
             Log("Sleeping the program a bit to wait for pkill to finish...", tabs=1).info()
             time.sleep(0.25)
@@ -130,7 +131,7 @@ class Actions:
             for command in commands:
                 Log(f"Running: {command}", tabs=1).info()
                 try:
-                    subprocess.run(command, capture_output = True, text = True)
+                    subprocess.run(command, capture_output=True, text=True, check=False)
                 except OSError as e:
                     Log("It failed! let's save it to inform the user!", tabs=1).info()
                     commands_failed[str(command)] = str(e)
