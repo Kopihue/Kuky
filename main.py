@@ -1,134 +1,129 @@
 #!/usr/bin/env python
 
 import sys
+from dataclasses import dataclass
 from actions import Actions
 from logs import Log
-from exceptions import *
+from exceptions import (
+    CommandsFailedError,
+    CreateKukyConfigDirError,
+    RestartWindowManagerError,
+)
 
 def main() -> int:
+    args = parse_args()
+
+    if args.action == "help":
+        Actions.print_help()
+        return 0
+
+    Log.enabled = args.verbose
+    return run(args)
+
+@dataclass
+class ParsedArgs:
+    action: str | None
+    profile: str | None
+    verbose: bool
+
+def parse_args() -> ParsedArgs:
+    action = None
+    profile = None
+    verbose = True
+
     args = sys.argv[1:]
-    args.reverse()
-
-    help_panel = False
-    switch, profile = False, None
-    list_profiles = False
-    random = False
-    enable_verbose = True
-
     if not args:
-        help_panel = True
+        action = "help"
 
-    while args:
-        arg = args.pop()
+    args = iter(args)
+    while True:
+        try:
+            arg = next(args)
+        except StopIteration:
+            break
 
         match arg:
+            case "-s":
+                verbose = False
+
             case "help":
-                help_panel = True
+                action = "help"
                 break
 
             case "switch":
-                switch = True
+                action = "switch"
                 try:
-                    profile = args.pop()
-                except IndexError:
-                    Log("Switch action requires a profile to work with!").error()
-                    return 0
+                    profile = next(args)
+                except StopIteration:
+                    pass
                 break
 
             case "list":
-                list_profiles = True
+                action = "list"
                 break
 
             case "random":
-                random = True
+                action = "random"
                 break
 
-            case "-s":
-                enable_verbose = False
+            case _:
+                action = "help"
+                break
+
+    return ParsedArgs(
+        action=action,
+        profile=profile,
+        verbose=verbose
+    )
+
+def run(args: ParsedArgs) -> int:
+    try:
+        Log("Verifying program health...").info()
+        actions = Actions()
+        match args.action:
+            case "switch":
+                if args.profile is not None:
+                    actions.switch_profile(args.profile)
+                else:
+                    Log("The switch action requires an argument to work with!", force=True).error()
+                    return 1
+
+            case "random":
+                actions.switch_random_profile()
+
+            case "list":
+                profiles = actions.list_profiles()
+                for profile in profiles:
+                    print(profile)
 
             case _:
-                Log("Invalid action, try: \"help\" for help!").warning()
-                return 0
+                return 1
 
-    Log.enabled = enable_verbose
-    if help_panel:
-        Actions.show_help_panel()
-        return 0
+    except ValueError as e:
+        Log(str(e), force=True).error()
+        return 1
 
-    elif switch and profile:
-        error_ocurred = False
+    except IndexError as e:
+        Log(str(e), force=True).error()
+        return 1
 
-        Log("Verifying program health...").info()
-        try:
-            action = Actions()
-            action.switch_chosen_profile(profile)
-        except CreateKukyConfigDirError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
+    except CreateKukyConfigDirError as e:
+        Log(str(e), force=True).error()
+        return 1
 
-        except ValueError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
+    except RestartWindowManagerError as e:
+        Log(str(e), force=True).error()
+        return 1
 
-        except RestartWindowManagerError as e:
-            Log(str(e), force=True).warning()
-            error_ocurred = True
+    except CommandsFailedError as e:
+        Log(str(e), force=True).error()
+        return 1
 
-        except CommandsFailedError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
-
-        if error_ocurred:
-            return 1
-
-    elif random:
-        error_ocurred = False
-        try:
-            action = Actions()
-            action.switch_random_profile()
-        except CreateKukyConfigDirError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
-
-        except IndexError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
-
-        except ValueError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
-
-        except RestartWindowManagerError as e:
-            Log(str(e), force=True).warning()
-            error_ocurred = True
-
-        except CommandsFailedError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
-
-        if error_ocurred:
-            return 1
-
-    elif list_profiles:
-        error_ocurred = False
-        try:
-            action = Actions()
-            profiles = action.get_profiles_list()
-        except CreateKukyConfigDirError as e:
-            Log(str(e), force=True).error()
-            error_ocurred = True
-
-        if error_ocurred:
-            return 1
-
-        if not profiles:
-            Log("No profiles to show, create yourself one bro", force=True).warning()
-        else:
-            for profile in profiles:
-                print(f"[+] {profile.name}")
+    except OSError as e:
+        Log(repr(e), force=True).error()
+        return 1
 
     return 0
 
 if __name__ == "__main__":
-    status_code = main()
-    sys.exit(status_code)
+    sys.exit(main())

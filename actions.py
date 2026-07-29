@@ -4,7 +4,6 @@ import random
 import subprocess
 import tomllib
 from pathlib import Path
-
 from exceptions import (
     CommandsFailedError,
     CreateKukyConfigDirError,
@@ -30,12 +29,12 @@ class Actions:
         self.profiles = [profile for profile in self.kuky_dir.iterdir()]
 
     @staticmethod
-    def show_help_panel():
+    def print_help():
         print("USAGE: kuky [flag] [action] [argument]")
 
-    def switch_chosen_profile(self, chosen_profile: str):
-        Log(f"Verifying chosen profile \"{chosen_profile}\" existence...", new_lines=1).info()
-        profile = self.kuky_dir / chosen_profile
+    def switch_profile(self, profile_name: str):
+        Log(f"Verifying chosen profile \"{profile_name}\" existence...", new_lines=1).info()
+        profile = self.kuky_dir / profile_name
         if not profile.exists():
             raise ValueError("Choosen profile does not exist!")
 
@@ -46,10 +45,10 @@ class Actions:
         self._create_symlinks(profile_programs)
 
         Log("Let's get that TOML config file!", new_lines=1).info()
-        data = self._get_toml_config_file_data(profile)
+        data = self._load_config(profile)
 
         Log("Let's execute some commands from the TOML config file!", new_lines=1).info()
-        commands_failed = self._reload_programs_from_toml(data)
+        commands_failed = self._execute_config(data)
         if commands_failed is not None:
             raise CommandsFailedError(commands_failed)
 
@@ -62,12 +61,10 @@ class Actions:
 
         choice = random.randint(0, len(self.profiles) - 1)
         Log(f"The randomness of life has chosen: {self.profiles[choice].name}!").info()
-        self.switch_chosen_profile(self.profiles[choice].name)
+        self.switch_profile(self.profiles[choice].name)
 
-    def get_profiles_list(self) -> list[Path]:
+    def list_profiles(self) -> list[Path]:
         return self.profiles.copy()
-
-    # *************************************************************** #
 
     def _create_symlinks(self, profile_programs: list[Path]):
         for profile_program_dir in profile_programs:
@@ -81,15 +78,12 @@ class Actions:
                     config_program_dir.unlink()
             except FileNotFoundError:
                 pass
-            except OSError as e:
-                raise e
 
             config_program_dir.symlink_to(profile_program_dir)
 
-
-    def _get_toml_config_file_data(self, chosen_profile: Path) -> dict:
+    def _load_config(self, profile_name: Path) -> dict:
         Log("Verifying TOML config file existence...", tabs=1).info()
-        toml_path = chosen_profile / "config.toml"
+        toml_path = profile_name / "config.toml"
         if not toml_path.exists():
             raise RestartWindowManagerError("TOML config file not found")
 
@@ -99,7 +93,7 @@ class Actions:
 
         return data
 
-    def _reload_programs_from_toml(self, data: dict) -> dict[str, str] | None:
+    def _execute_config(self, data: dict) -> dict[str, str] | None:
         Log("Getting [execute] TOML field...", tabs=1).info()
         execute_field = data.get("execute")
         if not execute_field:
