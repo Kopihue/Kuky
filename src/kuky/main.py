@@ -2,9 +2,9 @@
 
 import sys
 from dataclasses import dataclass
+from kopilogs.logs import Log
 
 from kuky.actions import Actions
-from kuky.logs import Log
 from kuky.exceptions import (
     CommandsFailedError,
     CreateKukyConfigDirError,
@@ -79,14 +79,13 @@ def parse_args() -> ParsedArgs:
 
 def run(args: ParsedArgs) -> int:
     try:
-        Log("Verifying program health...").info()
         actions = Actions()
         match args.action:
             case "switch":
                 if args.profile is not None:
                     actions.switch_profile(args.profile)
                 else:
-                    Log("The switch action requires an argument to work with!", force=True).error()
+                    Log("The switch action requires an argument to work with!", force_log=True).error()
                     return 1
 
             case "random":
@@ -94,34 +93,36 @@ def run(args: ParsedArgs) -> int:
 
             case "list":
                 profiles = actions.list_profiles()
+                print()
                 for profile in profiles:
-                    print(profile)
+                    Log(profile.name, force_icon=True).info()
+                print()
 
             case _:
                 return 1
 
     except ValueError as e:
-        Log(str(e), force=True).error()
+        Log(str(e), force_log=True).error()
         return 1
 
     except IndexError as e:
-        Log(str(e), force=True).error()
+        Log(str(e), force_log=True).error()
         return 1
 
     except CreateKukyConfigDirError as e:
-        Log(str(e), force=True).error()
+        Log(str(e), force_log=True).error()
         return 1
 
     except RestartWindowManagerError as e:
-        Log(str(e), force=True).error()
+        Log(str(e), force_log=True).error()
         return 1
 
     except CommandsFailedError as e:
-        Log(str(e), force=True).error()
+        Log(str(e), force_log=True).error()
         return 1
 
     except OSError as e:
-        Log(repr(e), force=True).error()
+        Log(repr(e), force_log=True).error()
         return 1
 
     return 0

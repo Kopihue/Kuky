@@ -8,6 +8,9 @@ version = "0.0.1"
 description = "Profile switcher for window managers"
 readme = "README.md"
 requires-python = ">=3.9"
+dependencies = [
+    "kopilogs == 0.1.0"
+]
 
 [project.scripts]
 kuky = "kuky.main:main"

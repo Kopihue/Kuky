@@ -4,29 +4,27 @@ import random
 import subprocess
 import tomllib
 from pathlib import Path
+from kopilogs.logs import Log
 
 from kuky.exceptions import (
     CommandsFailedError,
     CreateKukyConfigDirError,
     RestartWindowManagerError,
 )
-from kuky.logs import Log
 
 class Actions:
     def __init__(self):
         self.config_dir = Path.home() / ".config"
         self.kuky_dir = self.config_dir / "kuky"
 
-        Log("Verifying ~/.config/kuky/ existence...", tabs=1).info()
         if not self.kuky_dir.exists():
-            Log("It does not exist!", tabs=1).info()
+            Log(".config/kuky/ does not exist!", tabs=1).info()
             Log("Creating it...", tabs=1).info()
             try:
                 self.kuky_dir.mkdir(parents = True)
             except OSError as e:
                 raise CreateKukyConfigDirError(str(e))
 
-        Log("Loading profiles into memory...", tabs=1).info()
         self.profiles = [profile for profile in self.kuky_dir.iterdir()]
 
     @staticmethod
