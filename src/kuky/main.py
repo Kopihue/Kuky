@@ -2,9 +2,10 @@
 
 import sys
 from dataclasses import dataclass
-from actions import Actions
-from logs import Log
-from exceptions import (
+
+from kuky.actions import Actions
+from kuky.logs import Log
+from kuky.exceptions import (
     CommandsFailedError,
     CreateKukyConfigDirError,
     RestartWindowManagerError,

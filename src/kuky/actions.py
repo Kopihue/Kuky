@@ -4,12 +4,13 @@ import random
 import subprocess
 import tomllib
 from pathlib import Path
-from exceptions import (
+
+from kuky.exceptions import (
     CommandsFailedError,
     CreateKukyConfigDirError,
     RestartWindowManagerError,
 )
-from logs import Log
+from kuky.logs import Log
 
 class Actions:
     def __init__(self):
